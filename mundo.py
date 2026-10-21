@@ -1,12 +1,55 @@
+RISCOS = ("baixo", "medio", "alto", "final")
+ 
+ 
 class Mercadoria:
-    def __init__(self, nome):
+    def __init__(self, nome, valor):
+        if valor <= 0:
+            raise Exception("O valor da mercadoria deve ser maior que zero")
         self.__nome = nome
-
+        self.__valor = valor
+ 
     def get_nome(self):
         return self.__nome
-
+ 
+    def get_valor(self):
+        return self.__valor
+ 
     def __str__(self):
+        return f"{self.__nome} ({self.__valor} créditos)"
+ 
+ 
+class Inimigo:
+    def __init__(self, nome, vida, ataque):
+        self.__nome = nome
+        self.__vida_max = vida
+        self.__vida = vida
+        self.__ataque = ataque
+ 
+    def get_nome(self):
         return self.__nome
+ 
+    def get_vida(self):
+        return self.__vida
+ 
+    def get_ataque(self):
+        return self.__ataque
+ 
+    def receber_dano(self, valor):
+        if valor < 0:
+            raise Exception("O dano não pode ser negativo")
+        self.__vida = max(0, self.__vida - valor)
+ 
+    def esta_vivo(self):
+        return self.__vida > 0
+ 
+    def copiar(self):
+        return Inimigo(self.__nome, self.__vida_max, self.__ataque)
+ 
+    def __str__(self):
+        return (
+            f"{self.__nome} | vida {self.__vida}/{self.__vida_max} "
+            f"| ataque {self.__ataque}"
+        )
 
 class Planeta:
     def __init__(self, nome, posicao, precos):
