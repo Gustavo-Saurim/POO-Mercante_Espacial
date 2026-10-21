@@ -80,18 +80,66 @@ class Planeta:
             f"{self.__nome} | risco {self.__risco}"
             f"| {len(self.__inimigos)} inimigos"
         )
- 
+
+def criar_galaxia():
+    sucata = Mercadoria("Sucata", 10)
+    cristal = Mercadoria("Cristal Bruto", 35)
+    liga = Mercadoria("Liga Estelar", 90)
+    nucleo = Mercadoria("Núcleo de Plasma", 200)
+
+    return  [
+        Planeta(
+            "Terra Nova",
+            "baixo",
+            [Inimigo("Drone Sucateiro", 30, 5), Inimigo("Saqueador Novato", 40, 7)],
+            [(sucata, 4), (cristal, 1)],
+        ),
+        Planeta(
+            "Ferrum",
+            "medio",
+            [Inimigo("Pirata Espacial", 60, 10), Inimigo("Caçador de Recompensas", 70, 12)],
+            [(cristal, 3), (liga, 1)],
+        ),
+        Planeta(
+            "Aridia",
+            "medio",
+            [Inimigo("Mineradora Rebelde", 65, 11), Inimigo("Predador das Dunas", 75, 13)],
+            [(cristal, 2), (liga, 2)],
+        ),
+        Planeta(
+            "Nexus",
+            "alto",
+            [Inimigo("Caçador de Elite", 100, 18), Inimigo("Fragata Sombria", 120, 22), Inimigo("Guardião Antigo", 150, 25)],
+            [(liga, 3), (nucleo, 2)],
+        ),
+        Planeta(
+            "Coração do Vazio",
+            "final",
+            [Inimigo("Sentinela do Vazio", 140, 24), Inimigo("Senhor", 250, 30)],
+            [],
+        ),
+    ]
  
 if __name__ == "__main__":
-    terra = Planeta("Terra Nova", 0, {"Grãos": 10, "Ferro": 50, "Chips": 200})
-    nexus = Planeta("Nexus", 60, {"Grãos": 20, "Ferro": 100, "Chips": 50})
- 
-    print(terra)
-    print(Mercadoria("Ferro"))
-    print(terra.get_preco("Ferro"))
-    print(terra.distancia_ate(nexus))
- 
+    galaxia = criar_galaxia()
+    for planeta in galaxia:
+        print(planeta)
+
+    terra_nova = galaxia[0]
+    inimigos = terra_nova.criar_inimigos()
+    print(inimigos[0])
+    inimigos[0].receber_dano(12)
+    print(inimigos[0])
+    print(terra_nova.criar_inimigos()[0])
+
+    for mercadoria, qtd in terra_nova.get_loot():
+        print(f"{qtd}x {mercadoria}")
+
+    print(galaxia[-1].eh_final())
+
     try:
-        terra.get_preco("Ouro")
+        Planeta("Teste", "extremo", [], [])
     except Exception as erro:
         print("Erro esperado:", erro)
+
+    
