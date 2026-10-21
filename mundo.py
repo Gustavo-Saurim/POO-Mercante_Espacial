@@ -52,24 +52,34 @@ class Inimigo:
         )
 
 class Planeta:
-    def __init__(self, nome, posicao, precos):
+    def __init__(self, nome, risco, inimigos, loot):
+        if risco not in RISCOS:
+            raise Exception(f"Risco Inválido: {risco}")
         self.__nome = nome
-        self.__posicao = posicao
-        self.__precos = precos
- 
+        self.__risco = risco 
+        self.__inimigos = inimigos
+        self.__loot = loot 
+
     def get_nome(self):
         return self.__nome
- 
-    def get_preco(self, nome):
-        if nome not in self.__precos:
-            raise Exception(f"{nome} não é vendida em {self.__nome}")
-        return self.__precos[nome]
- 
-    def distancia_ate(self, outro):
-        return abs(self.__posicao - outro.__posicao)
- 
+
+    def get_risco(self):
+        return self.__risco
+
+    def eh_final(self):
+        return self.__risco == "final"
+
+    def criar_inimigos(self):
+        return [inimigo.copiar() for inimigo in self.__inimigos]
+
+    def get_loot(self):
+        return list(self.__loot)
+
     def __str__(self):
-        return f"{self.__nome} (posição {self.__posicao})"
+        return (
+            f"{self.__nome} | risco {self.__risco}"
+            f"| {len(self.__inimigos)} inimigos"
+        )
  
  
 if __name__ == "__main__":
