@@ -27,3 +27,17 @@ class Planeta:
 
     def str(self):
         return f"{self.nome} (posicao{self.posicao})"
+
+if __name__ == "__main__":
+    terra = Planeta("Terra Nova",0, {"Grãos": 10, "Ferro":50, "Chips":200})
+    nexus = Planeta("Nexus",60,{"Grãos": 20, "Ferro":100, "Chips":50})
+
+    print(terra)
+    print(Mercadoria("Ferro"))
+    print(terra.get_preco("Ferro"))
+    print(terra.distancia_ate(nexus))
+
+    try:
+        terra.get_preco("Ouro")
+    except Exception as erro:
+        print("Erro esperado:", erro)
