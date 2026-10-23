@@ -77,7 +77,7 @@ class Planeta:
 
     def __str__(self):
         return (
-            f"{self.__nome} | risco {self.__risco}"
+            f"{self.__nome} | risco {self.__risco} "
             f"| {len(self.__inimigos)} inimigos"
         )
 
