@@ -1,5 +1,4 @@
-from mundo import criar_galaxia
-
+import * from mundo.py
 
 def main():
     print("=== Mercante Espacial ===")
