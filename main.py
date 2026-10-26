@@ -1,4 +1,4 @@
-import * from mundo.py
+from mundo import *
 
 def main():
     print("=== Mercante Espacial ===")
