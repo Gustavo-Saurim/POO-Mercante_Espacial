@@ -6,17 +6,16 @@ VIDA_BASE = 100
 ATAQUE_BASE = 15
 CAPACIDADE_CARGUEIRO = 20
 CAPACIDADE_FRAGATA = 12
-REDUCAO_BLINDAGEM = 0.4  # a blindagem corta 40% do dano recebido em combate
+REDUCAO_BLINDAGEM = 0.4
 
 
 class Nave(ABC):
-    """Classe abstrata: não existe "uma nave qualquer", só Cargueiro ou Fragata."""
 
     __vida_max: int
     __vida: int
     __ataque: int
     __bonus_carga: int
-    __carga: list  # List[Mercadoria] -> agregação (uma entrada por unidade)
+    __carga: list 
 
     def __init__(self):
         self.__vida_max = VIDA_BASE
@@ -27,7 +26,6 @@ class Nave(ABC):
 
     @abstractmethod
     def capacidade(self):
-        """Quantas unidades de mercadoria cabem no porão (sem upgrades)."""
         pass
 
     def get_vida(self):
@@ -85,7 +83,6 @@ class Nave(ABC):
             self.__carga.append(m)
 
     def remover_carga(self, nome: str, qtd: int):
-        """Remove `qtd` unidades da mercadoria `nome` e devolve a lista das removidas."""
         if qtd <= 0:
             raise Exception("Quantidade inválida")
         if self.quantidade(nome) < qtd:
@@ -119,21 +116,18 @@ class Nave(ABC):
 
 
 class BlindagemMixin:
-    """Mixin: só métodos, nenhum atributo. Pode ser "encaixado" em qualquer nave."""
 
     def reduzir_dano(self, valor: float):
         return valor * (1 - REDUCAO_BLINDAGEM)
 
 
 class Cargueiro(Nave):
-    """Porão grande, sem blindagem."""
 
     def capacidade(self):
         return CAPACIDADE_CARGUEIRO
 
 
 class Fragata(BlindagemMixin, Nave):
-    """Porão menor, mas a blindagem reduz o dano recebido em combate."""
 
     def capacidade(self):
         return CAPACIDADE_FRAGATA
