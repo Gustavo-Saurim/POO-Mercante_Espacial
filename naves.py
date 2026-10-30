@@ -2,91 +2,126 @@ from abc import ABC, abstractmethod
 
 from mundo import Mercadoria
 
-COMBUSTIVEL_MAX = 100.0
+VIDA_BASE = 100
+ATAQUE_BASE = 15
 CAPACIDADE_CARGUEIRO = 20
 CAPACIDADE_FRAGATA = 12
-REDUCAO_BLINDAGEM = 0.4  # a blindagem corta 40% das perdas em combate
+REDUCAO_BLINDAGEM = 0.4  # a blindagem corta 40% do dano recebido em combate
 
 
 class Nave(ABC):
     """Classe abstrata: não existe "uma nave qualquer", só Cargueiro ou Fragata."""
 
-    __combustivel: float
+    __vida_max: int
+    __vida: int
+    __ataque: int
+    __bonus_carga: int
     __carga: list  # List[Mercadoria] -> agregação (uma entrada por unidade)
 
     def __init__(self):
-        self.__combustivel = COMBUSTIVEL_MAX
+        self.__vida_max = VIDA_BASE
+        self.__vida = VIDA_BASE
+        self.__ataque = ATAQUE_BASE
+        self.__bonus_carga = 0
         self.__carga = []
 
     @abstractmethod
     def capacidade(self):
-        """Quantas unidades de mercadoria cabem no porão."""
+        """Quantas unidades de mercadoria cabem no porão (sem upgrades)."""
         pass
 
-    def get_combustivel(self):
-        return self.__combustivel
+    def get_vida(self):
+        return self.__vida
+
+    def get_vida_max(self):
+        return self.__vida_max
+
+    def get_ataque(self):
+        return self.__ataque
 
     def get_carga(self):
         return list(self.__carga)
 
-    def gastar_combustivel(self, qtd: float):
-        if qtd < 0:
-            raise Exception("Quantidade de combustível inválida")
-        if qtd > self.__combustivel:
-            raise Exception(
-                f"Combustível insuficiente: precisa de {qtd}, tem {self.__combustivel}"
-            )
-        self.__combustivel -= qtd
+    def esta_viva(self):
+        return self.__vida > 0
 
-    def abastecer(self, qtd: float):
-        if qtd <= 0:
-            raise Exception("Quantidade de combustível inválida")
-        if self.__combustivel + qtd > COMBUSTIVEL_MAX:
-            raise Exception(f"O tanque comporta no máximo {COMBUSTIVEL_MAX}")
-        self.__combustivel += qtd
+    def reduzir_dano(self, valor: float):
+        return valor
+
+    def receber_dano(self, valor: float):
+        if valor < 0:
+            raise Exception("O dano não pode ser negativo")
+        dano = round(self.reduzir_dano(valor))
+        self.__vida = max(0, self.__vida - dano)
+        return dano
+
+    def reparar(self, qtd: int):
+        if qtd < 0:
+            raise Exception("Quantidade de reparo inválida")
+        self.__vida = min(self.__vida_max, self.__vida + qtd)
+
+    def aumentar_ataque(self, valor: int):
+        self.__ataque += valor
+
+    def aumentar_vida_max(self, valor: int):
+        self.__vida_max += valor
+        self.__vida += valor
+
+    def aumentar_carga(self, valor: int):
+        self.__bonus_carga += valor
+
+    def capacidade_total(self):
+        return self.capacidade() + self.__bonus_carga
+
+    def espaco_livre(self):
+        return self.capacidade_total() - len(self.__carga)
 
     def adicionar_carga(self, m: Mercadoria, qtd: int):
         if qtd <= 0:
             raise Exception("Quantidade inválida")
-        if len(self.__carga) + qtd > self.capacidade():
-            livre = self.capacidade() - len(self.__carga)
-            raise Exception(f"Porão cheio: só cabem mais {livre} unidades")
+        if qtd > self.espaco_livre():
+            raise Exception(f"Porão cheio: só cabem mais {self.espaco_livre()} unidades")
         for _ in range(qtd):
             self.__carga.append(m)
 
     def remover_carga(self, nome: str, qtd: int):
-        """Remove `qtd` unidades da mercadoria `nome` e devolve o objeto Mercadoria."""
+        """Remove `qtd` unidades da mercadoria `nome` e devolve a lista das removidas."""
         if qtd <= 0:
             raise Exception("Quantidade inválida")
         if self.quantidade(nome) < qtd:
             raise Exception(f"Você não tem {qtd}x {nome} no porão")
-        removida = None
-        for _ in range(qtd):
-            for m in self.__carga:
-                if m.get_nome() == nome:
-                    self.__carga.remove(m)
-                    removida = m
-                    break
-        return removida
+        removidas = []
+        restante = []
+        for m in self.__carga:
+            if m.get_nome() == nome and len(removidas) < qtd:
+                removidas.append(m)
+            else:
+                restante.append(m)
+        self.__carga = restante
+        return removidas
 
     def quantidade(self, nome: str):
         return sum(1 for m in self.__carga if m.get_nome() == nome)
 
-    def __str__(self):
-        tipos = {}
+    def listar_carga(self):
+        resumo = {}
         for m in self.__carga:
-            tipos[m.get_nome()] = tipos.get(m.get_nome(), 0) + 1
-        porao = ", ".join(f"{q}x {n}" for n, q in tipos.items()) or "vazio"
+            resumo[m.get_nome()] = resumo.get(m.get_nome(), 0) + 1
+        return resumo
+
+    def __str__(self):
+        porao = ", ".join(f"{q}x {n}" for n, q in self.listar_carga().items()) or "vazio"
         return (
-            f"{type(self).__name__} | combustível {self.__combustivel:.0f}/{COMBUSTIVEL_MAX:.0f} "
-            f"| porão {len(self.__carga)}/{self.capacidade()} ({porao})"
+            f"{type(self).__name__} | vida {self.__vida}/{self.__vida_max} "
+            f"| ataque {self.__ataque} "
+            f"| porão {len(self.__carga)}/{self.capacidade_total()} ({porao})"
         )
 
 
 class BlindagemMixin:
     """Mixin: só métodos, nenhum atributo. Pode ser "encaixado" em qualquer nave."""
 
-    def reduzir_perda(self, valor: float):
+    def reduzir_dano(self, valor: float):
         return valor * (1 - REDUCAO_BLINDAGEM)
 
 
@@ -98,7 +133,7 @@ class Cargueiro(Nave):
 
 
 class Fragata(BlindagemMixin, Nave):
-    """Porão menor, mas a blindagem reduz o que se perde em combate."""
+    """Porão menor, mas a blindagem reduz o dano recebido em combate."""
 
     def capacidade(self):
         return CAPACIDADE_FRAGATA
@@ -109,12 +144,18 @@ if __name__ == "__main__":
 
     cargueiro = Cargueiro()
     cargueiro.adicionar_carga(sucata, 5)
-    cargueiro.gastar_combustivel(30)
+    print(cargueiro)
+    print("Removidas:", len(cargueiro.remover_carga("Sucata", 2)))
+    print("Dano sofrido:", cargueiro.receber_dano(40))
+    cargueiro.reparar(15)
+    cargueiro.aumentar_ataque(5)
+    cargueiro.aumentar_vida_max(20)
+    cargueiro.aumentar_carga(5)
     print(cargueiro)
 
     fragata = Fragata()
     print(fragata)
-    print("Perda de 100 com blindagem:", fragata.reduzir_perda(100))
+    print("Dano de 100 com blindagem:", fragata.receber_dano(100))
     print("MRO da Fragata:", [c.__name__ for c in Fragata.__mro__])
 
     try:
