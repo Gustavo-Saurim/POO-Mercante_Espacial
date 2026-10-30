@@ -188,4 +188,3 @@ if __name__ == "__main__":
     while jogo3.verificar_fim() is None:
         jogo3.turno_batalha("defender")
     print(jogo3.verificar_fim())
-jogo.py
