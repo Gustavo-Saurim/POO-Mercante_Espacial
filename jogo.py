@@ -6,6 +6,7 @@ from mundo import criar_galaxia
 
 PLANETAS_PARA_FINAL = 3
 VARIACAO_DANO = 0.2
+MULTIPLICADOR_DEFESA = 1.6
 ARQUIVO_SAVE = "save.pkl"
 
 
@@ -17,6 +18,7 @@ class Jogo:
         self.__planeta_atual = None
         self.__inimigos = []
         self.__final_vencido = False
+        self.__ataque_carregado = False
 
     def get_planetas(self):
         return list(self.__planetas)
@@ -47,6 +49,7 @@ class Jogo:
             raise Exception(f"{planeta.get_nome()} não está disponível")
         self.__planeta_atual = planeta
         self.__inimigos = planeta.criar_inimigos()
+        self.__ataque_carregado = False
 
     def turno_batalha(self, acao):
         if self.__planeta_atual is None:
@@ -62,9 +65,14 @@ class Jogo:
         mensagens = []
 
         if defendendo:
-            mensagens.append("Você se prepara para defender o próximo ataque")
+            self.__ataque_carregado = True
+            mensagens.append("Você se prepara para defender e carrega o próximo ataque "
+                f"(dano x{MULTIPLICADOR_DEFESA})")
         else:
             dano = self.__sortear_dano(nave.get_ataque())
+            if self.__ataque_carregado:
+                dano = round(dano * MULTIPLICADOR_DEFESA)
+                self.__ataque_carregado = False
             inimigo.receber_dano(dano)
             mensagens.append(
                 f"Você causou {dano} de dano a {inimigo.get_nome()} "

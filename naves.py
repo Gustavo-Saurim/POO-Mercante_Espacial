@@ -3,10 +3,11 @@ from abc import ABC, abstractmethod
 from mundo import Mercadoria
 
 VIDA_BASE = 100
+VIDA_CARGUEIRO = 160
 ATAQUE_BASE = 15
 CAPACIDADE_CARGUEIRO = 20
 CAPACIDADE_FRAGATA = 12
-REDUCAO_BLINDAGEM = 0.4
+REDUCAO_BLINDAGEM = 0.25
 
 
 class Nave(ABC):
@@ -18,8 +19,8 @@ class Nave(ABC):
     __carga: list 
 
     def __init__(self):
-        self.__vida_max = VIDA_BASE
-        self.__vida = VIDA_BASE
+        self.__vida_max = self.vida_inicial()
+        self.__vida = self.vida_inicial()
         self.__ataque = ATAQUE_BASE
         self.__bonus_carga = 0
         self.__carga = []
@@ -27,6 +28,9 @@ class Nave(ABC):
     @abstractmethod
     def capacidade(self):
         pass
+
+    def vida_inicial(self):
+        return VIDA_BASE
 
     def get_vida(self):
         return self.__vida
@@ -125,6 +129,9 @@ class Cargueiro(Nave):
 
     def capacidade(self):
         return CAPACIDADE_CARGUEIRO
+
+    def vida_inicial(self):
+        return VIDA_CARGUEIRO
 
 
 class Fragata(BlindagemMixin, Nave):

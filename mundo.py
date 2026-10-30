@@ -95,10 +95,10 @@ class Planeta:
 
 
 def criar_galaxia():
-    sucata = Mercadoria("Sucata", 10)
-    cristal = Mercadoria("Cristal Bruto", 35)
-    liga = Mercadoria("Liga Estelar", 90)
-    nucleo = Mercadoria("Núcleo de Plasma", 200)
+    sucata = Mercadoria("Sucata", 15)
+    cristal = Mercadoria("Cristal Bruto", 50)
+    liga = Mercadoria("Liga Estelar", 135)
+    nucleo = Mercadoria("Núcleo de Plasma", 300)
 
     return [
         Planeta(
@@ -144,9 +144,9 @@ def criar_galaxia():
             "Nexus",
             "alto",
             [
-                Inimigo("Caçador de Elite", 100, 18),
-                Inimigo("Fragata Sombria", 120, 22),
-                Inimigo("Guardião Antigo", 150, 25)
+                Inimigo("Caçador de Elite", 85, 15),
+                Inimigo("Fragata Sombria", 102, 19),
+                Inimigo("Guardião Antigo", 128, 21)
             ],
             [
                 (liga, 3),
@@ -158,8 +158,8 @@ def criar_galaxia():
             "Coração do Vazio",
             "final",
             [
-                Inimigo("Sentinela do Vazio", 140, 24),
-                Inimigo("Senhor do Vazio", 250, 30)
+                Inimigo("Sentinela do Vazio", 119, 20),
+                Inimigo("Senhor do Vazio", 212, 26)
             ],
             []
         )

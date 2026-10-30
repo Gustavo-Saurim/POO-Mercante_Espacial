@@ -31,14 +31,14 @@ python main.py
 6. Depois de conquistar 3 planetas, o planeta final é liberado. Derrotar o chefão encerra o jogo com vitória.
 ## Regras
  
-**Início:** 100 créditos, nave com 100 de vida e 15 de ataque, porão vazio.
+**Início:** 100 créditos, nave com 15 de ataque e vida de 160 (Cargueiro) ou 100 (Fragata), porão vazio.
  
 **Naves**
  
 | Nave | Porão | Extra |
 |---|---|---|
-| Cargueiro | 30 unidades | Maior capacidade de carga |
-| Fragata | 20 unidades | Blindagem: recebe metade do dano |
+| Cargueiro | 20 unidades | Maior capacidade de carga e 160 de vida inicial |
+| Fragata | 12 unidades | Blindagem: reduz 25% do dano recebido |
  
 **Planetas**
  
@@ -50,7 +50,7 @@ python main.py
 | Nexus | alto | Caçador de Elite, Fragata Sombria, Guardião Antigo | 3 Liga Estelar, 2 Núcleo de Plasma |
 | Coração do Vazio | final | Sentinela do Vazio, Senhor do Vazio (chefão) | sem loot |
  
-**Itens e valor de venda:** Sucata 10, Cristal Bruto 35, Liga Estelar 90, Núcleo de Plasma 200.
+**Itens e valor de venda:** Sucata 15, Cristal Bruto 50, Liga Estelar 135, Núcleo de Plasma 300.
  
 **Batalha**
 - Ações do turno: **Atacar** ou **Defender**.
@@ -66,8 +66,8 @@ python main.py
 - Melhorias, com preço de `custo base × (nível + 1)`:
 | Melhoria | Efeito por compra | Custo base |
 |---|---|---|
-| Ataque | +5 de ataque | 100 |
-| Casco | +20 de vida máxima | 80 |
+| Ataque | +8 de ataque | 100 |
+| Casco | +30 de vida máxima | 80 |
 | Carga | +5 de capacidade do porão | 60 |
  
 **Fim de jogo**

@@ -4,8 +4,8 @@ from abc import ABCMeta, abstractmethod
 CREDITOS_INICIAIS = 100
 CUSTO_REPARO = 2
 UPGRADES = {
-    "ataque": (100, 5),
-    "casco": (80, 20),
+    "ataque": (100, 8),
+    "casco": (80, 30),
     "carga": (60, 5),
 }
 
