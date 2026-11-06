@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from mundo import Mercadoria
 
-VIDA_BASE = 100
+VIDA_FRAGATA = 100
 VIDA_CARGUEIRO = 160
 ATAQUE_BASE = 15
 CAPACIDADE_CARGUEIRO = 20
@@ -30,7 +30,7 @@ class Nave(ABC):
         pass
 
     def vida_inicial(self):
-        return VIDA_BASE
+        return VIDA_FRAGATA
 
     def get_vida(self):
         return self.__vida

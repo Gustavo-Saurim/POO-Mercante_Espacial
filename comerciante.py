@@ -70,7 +70,7 @@ class Comerciante(Exportavel):
             self.nave.aumentar_carga(ganho)
         self.__creditos -= custo
         self.__niveis[tipo] += 1
-        self.__historico.append(("upgarde", tipo, 1, -custo))
+        self.__historico.append(("upgrade", tipo, 1, -custo))
         return custo
 
     def reparar(self):
