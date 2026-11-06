@@ -103,7 +103,6 @@ class TelaMenu(Tela):
             return
         self.app.mostrar(TelaPrincipal)
 
-
 class TelaNovoJogo(Tela):
     def __init__(self, app):
         super().__init__(app)
@@ -149,7 +148,6 @@ class TelaNovoJogo(Tela):
         )
         self.app.mostrar(TelaPrincipal)
 
-
 class TelaPrincipal(Tela):
     def __init__(self, app):
         super().__init__(app)
@@ -180,3 +178,209 @@ class TelaPrincipal(Tela):
         ):
             self.app.jogo = None
             self.app.mostrar(TelaMenu)
+
+class TelaMapa(Tela):
+    def __init__(self, app):
+        super().__init__(app)
+        self.titulo("Mapa da galáxia")
+        bloqueio = texto_bloqueio(self.jogo)
+        if bloqueio:
+            self.texto(bloqueio)
+        tk.Label(self).pack()
+        for planeta in self.jogo.planetas_disponiveis():
+            self.botao(
+                descrever_planeta(planeta),
+                lambda p=planeta: self.ir(p),
+                largura=85,
+            )
+        tk.Label(self).pack()
+        self.botao("Voltar", lambda: app.mostrar(TelaPrincipal))
+ 
+    def ir(self, planeta):
+        try:
+            self.jogo.escolher_planeta(planeta)
+        except Exception as erro:
+            messagebox.showerror("Erro", str(erro))
+            return
+        self.app.mostrar(TelaBatalha)
+
+class TelaBatalha(Tela):
+    def __init__(self, app):
+        super().__init__(app)
+        self.titulo(f"Batalha em {self.jogo.planeta_atual().get_nome()}")
+        self.rotulo_nave = self.texto("")
+        self.rotulo_inimigo = self.texto("")
+        acoes = tk.Frame(self)
+        acoes.pack(pady=8)
+        self.atacar = self.botao(
+            "Atacar", lambda: self.agir("atacar"), largura=20, pai=acoes
+        )
+        self.atacar.pack(side="left", padx=6)
+        self.defender = self.botao(
+            "Defender", lambda: self.agir("defender"), largura=20, pai=acoes
+        )
+        self.defender.pack(side="left", padx=6)
+        self.log = tk.Text(self, height=16, width=95, font=FONTE_LOG, state="disabled")
+        self.log.pack(pady=8)
+        self.continuar = self.botao(
+            "Continuar", self.continuar_jogo, largura=20
+        )
+        self.continuar.config(state="disabled")
+        self.escrever(f"Você chegou a {self.jogo.planeta_atual().get_nome()}!")
+        self.atualizar()
+ 
+    def atualizar(self):
+        nave = self.jogo.jogador.nave
+        self.rotulo_nave.config(
+            text=f"Sua nave: vida {nave.get_vida()}/{nave.get_vida_max()} "
+            f"| ataque {nave.get_ataque()}"
+        )
+        inimigo = self.jogo.inimigo_atual()
+        self.rotulo_inimigo.config(text=f"Inimigo: {inimigo}" if inimigo else "")
+ 
+    def escrever(self, texto):
+        self.log.config(state="normal")
+        self.log.insert("end", texto + "\n")
+        self.log.see("end")
+        self.log.config(state="disabled")
+ 
+    def agir(self, acao):
+        try:
+            mensagens = self.jogo.turno_batalha(acao)
+        except Exception as erro:
+            messagebox.showerror("Erro", str(erro))
+            return
+        for mensagem in mensagens:
+            self.escrever(mensagem)
+        self.atualizar()
+        if self.jogo.planeta_atual() is None or self.jogo.verificar_fim() is not None:
+            self.encerrar()
+ 
+    def encerrar(self):
+        self.atacar.config(state="disabled")
+        self.defender.config(state="disabled")
+        self.continuar.config(state="normal")
+        if self.jogo.verificar_fim() is None:
+            self.escrever("Você segue para o comércio.")
+ 
+    def continuar_jogo(self):
+        if self.jogo.verificar_fim() is not None:
+            self.app.mostrar(TelaFim)
+        else:
+            self.app.mostrar(TelaComercio)
+
+class TelaComercio(Tela):
+    def __init__(self, app, mensagem=""):
+        super().__init__(app)
+        jogador = self.jogo.jogador
+        self.titulo("Comércio")
+        self.texto(f"Créditos: {jogador.get_creditos()}")
+        self.texto(f"Nave: {jogador.nave}")
+        self.texto(mensagem, fg=COR_SUCESSO)
+ 
+        self.botao("Vender toda a carga", self.vender_tudo)
+        self.texto("Carga:")
+        carga = jogador.nave.listar_carga()
+        if not carga:
+            self.texto("Seu porão está vazio.")
+        valores = {m.get_nome(): m.get_valor() for m in jogador.nave.get_carga()}
+        for nome, qtd in carga.items():
+            linha = tk.Frame(self)
+            linha.pack(anchor="w")
+            tk.Label(
+                linha,
+                text=f"{nome} - {qtd} un. a {valores[nome]} créditos cada",
+                font=FONTE,
+                width=50,
+                anchor="w",
+            ).pack(side="left")
+            tk.Button(
+                linha,
+                text="Vender...",
+                font=FONTE,
+                command=lambda n=nome, q=qtd: self.vender_item(n, q),
+            ).pack(side="left")
+ 
+        self.texto("Melhorias:")
+        for tipo in UPGRADES:
+            self.botao(
+                f"{NOMES_UPGRADES[tipo]} +{UPGRADES[tipo][1]} - "
+                f"{jogador.custo_upgrade(tipo)} créditos",
+                lambda t=tipo: self.melhorar(t),
+            )
+        self.botao(
+            f"Reparar a nave ({CUSTO_REPARO} créditos por ponto de vida)",
+            self.reparar,
+        )
+        self.botao("Voltar ao menu", lambda: app.mostrar(TelaPrincipal))
+ 
+    def agir(self, acao, *args, mensagem):
+        try:
+            resultado = acao(*args)
+        except Exception as erro:
+            messagebox.showerror("Erro", str(erro))
+            return
+        self.app.mostrar(TelaComercio, mensagem(resultado))
+ 
+    def vender_tudo(self):
+        self.agir(
+            self.jogo.jogador.vender_tudo,
+            mensagem=lambda ganho: "Seu porão está vazio."
+            if ganho == 0
+            else f"Você vendeu toda a carga e recebeu {ganho} créditos.",
+        )
+ 
+    def vender_item(self, nome, disponivel):
+        qtd = simpledialog.askinteger(
+            "Vender",
+            f"Quantidade de {nome} (1 a {disponivel}):",
+            minvalue=1,
+            maxvalue=disponivel,
+            parent=self,
+        )
+        if qtd is None:
+            return
+        self.agir(
+            self.jogo.jogador.vender,
+            nome,
+            qtd,
+            mensagem=lambda ganho: f"Você vendeu {qtd}x {nome} e recebeu {ganho} créditos.",
+        )
+ 
+    def melhorar(self, tipo):
+        self.agir(
+            self.jogo.jogador.comprar_upgrade,
+            tipo,
+            mensagem=lambda custo: f"Melhoria comprada por {custo} créditos.",
+        )
+ 
+    def reparar(self):
+        self.agir(
+            self.jogo.jogador.reparar,
+            mensagem=lambda qtd: f"Você reparou {qtd} pontos de vida.",
+        )
+
+class TelaFim(Tela):
+    def __init__(self, app):
+        super().__init__(app)
+        vitoria = self.jogo.verificar_fim() == "vitoria"
+        self.titulo("VITÓRIA" if vitoria else "DERROTA")
+        self.texto(
+            "Você derrotou o chefão do Coração do Vazio e salvou a galáxia!"
+            if vitoria
+            else "Sua nave foi destruída e a missão chegou ao fim."
+        )
+        self.texto(f"Créditos finais: {self.jogo.jogador.get_creditos()}")
+        tk.Label(self).pack()
+        self.botao("Exportar histórico", lambda: exportar_historico(self.jogo))
+        self.botao("Voltar ao menu inicial", self.voltar)
+ 
+    def voltar(self):
+        self.app.jogo = None
+        self.app.mostrar(TelaMenu)
+
+def main():
+    App().mainloop()
+
+if __name__ == "__main__":
+    main()
