@@ -36,7 +36,7 @@ def texto_bloqueio(jogo):
     disponiveis = [p for p in jogo.planetas_disponiveis() if not p.eh_final()]
     faltam = PLANETAS_PARA_FINAL - (len(normais) - len(disponiveis))
     final = next(p for p in jogo.get_planetas() if p.eh_final())
-    return f"{final.get_nome()} esta bloqueado: conquiste mais {faltam} planeta(s)."
+    return f"{final.get_nome()} está bloqueado: conquiste mais {faltam} planeta(s)."
 
 def exportar_historico(jogo):
     try:
@@ -45,10 +45,10 @@ def exportar_historico(jogo):
     except Exception as erro:
         messagebox.showerror("Erro", str(erro))
         return
-    messagebox.showinfo("Exportar", "Historico exportado em historico.csv e historico.txt.")
+    messagebox.showinfo("Exportar", "Histórico exportado em historico.csv e historico.txt.")
 
-class Tela(tk,Frame):
-    def __int__(self, app):
+class Tela(tk.Frame):
+    def __init__(self, app):
         super().__init__(app, padx=20, pady=20)
         self.app = app
 
@@ -74,13 +74,14 @@ class Tela(tk,Frame):
         return botao
 
 class App(tk.Tk):
-    def __int__(self):
+    def __init__(self):
         super().__init__()
         self.title("Mercante Espacial")
         self.geometry("900x720")
         self.jogo = None
         self.tela = None
         self.mostrar(TelaMenu)
+
     def mostrar(self, classe_tela, *args):
         if self.tela is not None:
             self.tela.destroy()
@@ -195,7 +196,7 @@ class TelaMapa(Tela):
             )
         tk.Label(self).pack()
         self.botao("Voltar", lambda: app.mostrar(TelaPrincipal))
- 
+
     def ir(self, planeta):
         try:
             self.jogo.escolher_planeta(planeta)
@@ -228,7 +229,7 @@ class TelaBatalha(Tela):
         self.continuar.config(state="disabled")
         self.escrever(f"Você chegou a {self.jogo.planeta_atual().get_nome()}!")
         self.atualizar()
- 
+
     def atualizar(self):
         nave = self.jogo.jogador.nave
         self.rotulo_nave.config(
@@ -237,13 +238,13 @@ class TelaBatalha(Tela):
         )
         inimigo = self.jogo.inimigo_atual()
         self.rotulo_inimigo.config(text=f"Inimigo: {inimigo}" if inimigo else "")
- 
+
     def escrever(self, texto):
         self.log.config(state="normal")
         self.log.insert("end", texto + "\n")
         self.log.see("end")
         self.log.config(state="disabled")
- 
+
     def agir(self, acao):
         try:
             mensagens = self.jogo.turno_batalha(acao)
@@ -255,14 +256,14 @@ class TelaBatalha(Tela):
         self.atualizar()
         if self.jogo.planeta_atual() is None or self.jogo.verificar_fim() is not None:
             self.encerrar()
- 
+
     def encerrar(self):
         self.atacar.config(state="disabled")
         self.defender.config(state="disabled")
         self.continuar.config(state="normal")
         if self.jogo.verificar_fim() is None:
             self.escrever("Você segue para o comércio.")
- 
+
     def continuar_jogo(self):
         if self.jogo.verificar_fim() is not None:
             self.app.mostrar(TelaFim)
@@ -277,7 +278,7 @@ class TelaComercio(Tela):
         self.texto(f"Créditos: {jogador.get_creditos()}")
         self.texto(f"Nave: {jogador.nave}")
         self.texto(mensagem, fg=COR_SUCESSO)
- 
+
         self.botao("Vender toda a carga", self.vender_tudo)
         self.texto("Carga:")
         carga = jogador.nave.listar_carga()
@@ -300,7 +301,7 @@ class TelaComercio(Tela):
                 font=FONTE,
                 command=lambda n=nome, q=qtd: self.vender_item(n, q),
             ).pack(side="left")
- 
+
         self.texto("Melhorias:")
         for tipo in UPGRADES:
             self.botao(
@@ -313,7 +314,7 @@ class TelaComercio(Tela):
             self.reparar,
         )
         self.botao("Voltar ao menu", lambda: app.mostrar(TelaPrincipal))
- 
+
     def agir(self, acao, *args, mensagem):
         try:
             resultado = acao(*args)
@@ -321,7 +322,7 @@ class TelaComercio(Tela):
             messagebox.showerror("Erro", str(erro))
             return
         self.app.mostrar(TelaComercio, mensagem(resultado))
- 
+
     def vender_tudo(self):
         self.agir(
             self.jogo.jogador.vender_tudo,
@@ -329,7 +330,7 @@ class TelaComercio(Tela):
             if ganho == 0
             else f"Você vendeu toda a carga e recebeu {ganho} créditos.",
         )
- 
+
     def vender_item(self, nome, disponivel):
         qtd = simpledialog.askinteger(
             "Vender",
@@ -346,14 +347,14 @@ class TelaComercio(Tela):
             qtd,
             mensagem=lambda ganho: f"Você vendeu {qtd}x {nome} e recebeu {ganho} créditos.",
         )
- 
+
     def melhorar(self, tipo):
         self.agir(
             self.jogo.jogador.comprar_upgrade,
             tipo,
             mensagem=lambda custo: f"Melhoria comprada por {custo} créditos.",
         )
- 
+
     def reparar(self):
         self.agir(
             self.jogo.jogador.reparar,
@@ -374,7 +375,7 @@ class TelaFim(Tela):
         tk.Label(self).pack()
         self.botao("Exportar histórico", lambda: exportar_historico(self.jogo))
         self.botao("Voltar ao menu inicial", self.voltar)
- 
+
     def voltar(self):
         self.app.jogo = None
         self.app.mostrar(TelaMenu)
