@@ -224,15 +224,3 @@ python jogo.py
 O teste do `jogo.py` simula uma partida completa: conquista três planetas, libera e vence o final, salva e carrega o jogo e provoca os erros esperados.
 
 A interface gráfica é testada jogando: `python interface.py`.
-
-## Divisão do trabalho
-
-| Integrante | Arquivo |
-|---|---|
-| Guilherme | `mundo.py` |
-| Marcus | `naves.py` |
-| Gustavo | `comerciante.py` |
-| Derick | `jogo.py` |
-
-UML, fluxograma, testes finais, interface gráfica, imagens e README foram feitos por todo o grupo.
-
