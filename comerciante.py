@@ -29,6 +29,9 @@ class Comerciante(Exportavel):
     def get_creditos(self):
         return self.__creditos
 
+    def get_nome(self):
+        return self.__nome
+
     def coletar(self, mercadoria, qtd):
         coletada = min(qtd, self.nave.espaco_livre())
         if coletada > 0:
@@ -53,14 +56,14 @@ class Comerciante(Exportavel):
 
     def custo_upgrade(self, tipo):
         if tipo not in UPGRADES:
-            raise Exception(f"Upgrade Invalido: {tipo}")
+            raise Exception(f"Upgrade inválido: {tipo}")
         custo_base, _ = UPGRADES[tipo]
         return custo_base * (self.__niveis[tipo] + 1)
 
     def comprar_upgrade(self, tipo):
         custo = self.custo_upgrade(tipo)
         if custo > self.__creditos:
-            raise Exception("Creditos insuficientes")
+            raise Exception("Créditos insuficientes")
         _, ganho = UPGRADES[tipo]
         if tipo == "ataque":
             self.nave.aumentar_ataque(ganho)
@@ -76,10 +79,10 @@ class Comerciante(Exportavel):
     def reparar(self):
         falta = self.nave.get_vida_max() - self.nave.get_vida()
         if falta == 0:
-            raise Exception("A nave ja esta com a vida cheia")
+            raise Exception("A nave já está com a vida cheia")
         qtd = min(falta, self.__creditos // CUSTO_REPARO)
         if qtd == 0:
-            raise Exception ("Creditos insuficientes")
+            raise Exception("Créditos insuficientes")
         custo = qtd * CUSTO_REPARO
         self.nave.reparar(qtd)
         self.__creditos -= custo
@@ -94,12 +97,12 @@ class Comerciante(Exportavel):
 
     def to_txt(self, caminho="historico.txt"):
         with open(caminho, "w", encoding="utf-8") as arquivo:
-            arquivo.write(f"Historico de {self.__nome}\n")
+            arquivo.write(f"Histórico de {self.__nome}\n")
             for tipo, descricao, qtd, valor in self.__historico:
                 arquivo.write(f"{tipo}: {descricao} | qtd {qtd} | valor {valor}\n")
 
     def __str__(self):
-        return f"{self.__nome} | {self.__creditos} creditos | {self.nave}"
+        return f"{self.__nome} | {self.__creditos} créditos | {self.nave}"
 
 if __name__ == "__main__":
     from mundo import Mercadoria
